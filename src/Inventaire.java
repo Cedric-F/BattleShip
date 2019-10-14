@@ -12,8 +12,7 @@ class Inventaire {
 
     void ajouterBateau(Bateau b) {
         //this.Bateaux.add(b);
-        this.getBateaux().put(b.getId(), b);
-        System.out.printf("Bateau n°%s de taille %s ajouté à l'inventaire.%n", b.getId(), b.getTaille());
+        this.Bateaux.put(b.getId(), b);
     }
 
     void retirerBateau(Bateau b) {
