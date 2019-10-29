@@ -4,6 +4,7 @@
       <w>abscisse</w>
       <w>ajouter</w>
       <w>ajouté</w>
+      <w>attaquant</w>
       <w>attaque</w>
       <w>avez</w>
       <w>bateau</w>
@@ -20,10 +21,15 @@
       <w>continuer</w>
       <w>coordonnées</w>
       <w>correctement</w>
+      <w>coule</w>
+      <w>coulé</w>
       <w>création</w>
+      <w>crée</w>
       <w>dernière</w>
       <w>déjà</w>
       <w>départ</w>
+      <w>détruit</w>
+      <w>etat</w>
       <w>generer</w>
       <w>initialisé</w>
       <w>inventaire</w>
@@ -34,9 +40,12 @@
       <w>leurs</w>
       <w>libre</w>
       <w>ligne</w>
+      <w>manqué</w>
+      <w>nouvelle</w>
       <w>objet</w>
       <w>occupe</w>
       <w>ordonnée</w>
+      <w>partie</w>
       <w>permet</w>
       <w>perso</w>
       <w>persos</w>
@@ -45,9 +54,12 @@
       <w>raté</w>
       <w>retirer</w>
       <w>retiré</w>
+      <w>récupère</w>
+      <w>statut</w>
       <w>taille</w>
       <w>tirer</w>
       <w>tiré</w>
+      <w>toucher</w>
       <w>touché</w>
       <w>touchée</w>
       <w>utilisé</w>

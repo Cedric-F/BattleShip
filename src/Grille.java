@@ -1,21 +1,40 @@
 class Grille {
-    private int [][] grille;
+    private Case [][] grille;
+
+    /**
+     * Génère un tableau à double entrée et le rempli de cases neutres (eau → 0)
+     * @param taille dimension du tableau
+     */
     Grille(int taille) {
-        this.grille = new int[taille][taille];
+        this.grille = new Case[taille][taille];
         for (int i = 0; i < taille; i++)
             for (int j = 0; j < taille; j++)
-                this.grille[j][i] = 0;
+                this.grille[j][i] = new CaseVide(i, j);
     }
 
-    int contenuCase(int x, int y) {
+    /**
+     * Renvoie le contenu de la case ciblée
+     * @param x ligne
+     * @param y colonne
+     * @return contenu de (x, y)
+     */
+    Case contenuCase(int x, int y) {
         return this.grille[x][y];
     }
 
-    int [][] getGrille() {
+    /**
+     * Renvoie la grille
+     * @return tableau à double entrée
+     */
+    Case [][] getGrille() {
         return this.grille;
     }
 
-    void updateGrille(int[][] g) {
+    /**
+     * Met la grille à jour
+     * @param g nouvelle grille
+     */
+    void setGrille(Case[][] g) {
         this.grille = g;
     }
 }

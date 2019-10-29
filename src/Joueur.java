@@ -10,16 +10,6 @@ class Joueur {
         this.perso = new Grille(10);
         this.attaque = new Grille(10);
         this.inventaire = new Inventaire();
-        this.initInventaire();
-    }
-
-    private void initInventaire() {
-        this.inventaire.ajouterBateau(new Bateau(0,5));
-        this.inventaire.ajouterBateau(new Bateau(1,4));
-        this.inventaire.ajouterBateau(new Bateau(2,3));
-        this.inventaire.ajouterBateau(new Bateau(3,3));
-        this.inventaire.ajouterBateau(new Bateau(4,2));
-        System.out.printf("Inventaire de %s complet : %s bateaux.%n", this.pseudo, this.inventaire.getBateaux().size());
     }
 
     String getPseudo() {
@@ -34,97 +24,110 @@ class Joueur {
         return this.perso;
     }
 
-    private Grille getAttaque() {
-        return this.attaque;
-    }
-
     /**
-     * Marque la case comme touchée sur la grille de l'attaquant (-1)
-     * Vérifie la case ciblée sur la grille perso du joueur adverse.
-     * Si un bateau occupe cette case (case == 1), celle-ci prend la valeur -1.
-     * @param x abscisse du point d'attaque
-     * @param y ordonnée du point d'attaque
+     * Détruit la case cible sur la grille attaque de l'attaquant.
+     * Vérifie le type de la case touchée sur la grille perso de la cible.
+     * Si un bateau occupe cette case, celui-ci perd un point d'état.
+     * Détruit le
+     * @param ligne abscisse du point d'attaque
+     * @param colonne ordonnée du point d'attaque
      * @param cible Joueur ciblé
-     * @return true si touché
      */
-    boolean tirer(int x, int y, Joueur cible) {
-        boolean touche;
+    void tirer(int ligne, int colonne, Joueur cible) {
+        Grille attaque = this.attaque; // grille de l'attaquant
+        Case[][] grilleAttaqueJoueur = attaque.getGrille();
+        Case caseAttaque = grilleAttaqueJoueur[ligne][colonne];
 
-        Grille attaque = this.getAttaque();
-        int[][] grilleAttaque = attaque.getGrille();
+        if (!(caseAttaque instanceof CaseDetruite)) { // si l'attaquant tire sur une nouvelle case
 
-        if (grilleAttaque[x][y] != -1) {
-            grilleAttaque[x][y] = -1;
-            attaque.updateGrille(grilleAttaque);
+            Grille ciblePerso = cible.getPerso(); // grille de la cible
+            Case[][] grillePersoCible = ciblePerso.getGrille();
 
-            Grille ciblePerso = cible.getPerso();
-            int[][] grillePerso = ciblePerso.getGrille();
-            touche = ciblePerso.contenuCase(x, y) == 1;
+            if (ciblePerso.contenuCase(ligne, colonne) instanceof CaseBateau) { // L'attaquant touche une case bateau
 
-            if (touche) {
-                grillePerso[x][y] = -1;
-                cible.perso.updateGrille(grillePerso);
+                Case caseCible = grillePersoCible[ligne][colonne]; // Récupère la case
+                Bateau b = ((CaseBateau) caseCible).getBateau();
+
                 System.out.println("Touché !");
+
+                if (b.toucher(caseCible))  { // Détruit le bateau si coulé
+                    System.out.println("Coulé !");
+                    cible.getInventaire().retirerBateau(b);
+                }
+
+                grillePersoCible[ligne][colonne] = new CaseDetruite(caseCible);
+                cible.perso.setGrille(grillePersoCible);
+            } else {
+                System.out.println("Manqué !");
             }
-        } else {
+
+            grilleAttaqueJoueur[ligne][colonne] = new CaseDetruite(caseAttaque);
+            attaque.setGrille(grilleAttaqueJoueur);
+
+        } else { // L'attaquant a déjà tiré sur cette case
             System.out.println("Vous avez déjà tiré à ces coordonnées!");
-            touche = false;
-            System.out.println("Raté !");
         }
-        return touche;
     }
 
     /**
-     * Permet de placer un bateau sur la grille perso, en vérifiant si l'espace utilisé est libre et dans le plan
+     * Place un bateau sur la grille perso, en vérifiant si l'espace utilisé est libre et dans le plan
      * @param b Objet Bateau
-     * @param x abscisse de départ
-     * @param y ordonnée de départ
+     * @param ligne abscisse de départ
+     * @param colonne ordonnée de départ
      * @param direction en ligne ou en colonne
      */
-    boolean placer(Bateau b, int x, int y, String direction) {
+    boolean placer(Bateau b, int ligne, int colonne, String direction) {
+        Grille g = this.perso;
 
-        Grille g = this.getPerso();
+        Case[][] grille = g.getGrille();
+        boolean isPlaced = false;
+        Case slot;
 
-        int[][] grille = g.getGrille();
-        boolean isPlaced = false; // true <- Le bateau est placé correctement, on met à jour la grille
+        b.setDirection(direction);
 
         try {
             switch (direction) {
                 case "droite": // Ne place le bateau que si sa dernière case est comprise dans la ligne
-                        for (int i = y; i < y + b.getTaille(); i++) {
-                            if (grille[x][i] == 1) {
-                                break; // Plus besoin de continuer si l'espace est déjà utilisé
-                            } else {
-                                grille[x][i] = 1;
-                                isPlaced = true; //
-                            }
+                    for (int i = colonne, idCase = 1; i < colonne + b.getTaille(); i++) {
+                        slot = grille[ligne][i];
+                        if (slot instanceof CaseBateau) {
+                            isPlaced = false;
+                            break; // Plus besoin de continuer si l'espace est déjà utilisé
+                        } else { // on crée une place bateau sur l'emplacement
+                            grille[ligne][i] = new CaseBateau(b, slot, idCase);
+                            isPlaced = true;
                         }
+                        idCase++;
+                    }
                     break;
 
                 case "bas":
-                        for (int i = x; i < x + b.getTaille(); i++) {
-                            if (grille[i][y] == 1) {
-                                break;
-                            } else {
-                                grille[i][y] = 1;
-                                isPlaced = true;
-                            }
+                    for (int i = ligne, idCase = 1; i < ligne + b.getTaille(); i++) {
+                        slot = grille[i][colonne];
+                        if (slot instanceof CaseBateau) {
+                            isPlaced = false;
+                            break;
+                        } else {
+                            grille[i][colonne] = new CaseBateau(b, slot, idCase);
+                            isPlaced = true;
                         }
-                    break;
-                default:
-                    System.out.println("Mauvaise direction.");
+                        idCase++;
+                    }
                     break;
             }
             if (isPlaced) {
-                this.inventaire.retirerBateau(b);
-                System.out.printf("Le bateau %s est placé en (%s,%s).%n", b.getId(), x, y);
-                g.updateGrille(grille);
-            } else
-                System.out.printf("Le bateau %s n'a pas été placé. Vérifiez les coordonnées.%n", b.getId());
-        } catch (ArrayIndexOutOfBoundsException e) {
-            System.out.println("Erreur, vérifiez les coordonnées.");
+                b.setPos(ligne, colonne);
+                System.out.printf("Le bateau %s est placé en (%s,%s).%n", b.getId(), ligne, colonne);
+                g.setGrille(grille);
+            } else {
+                System.out.println("Un bateau est déjà dans la zone.");
+                return false;
+            }
+        } catch (Exception e) {
+            System.out.println("Placement impossible.");
+            return false;
         }
 
-        return isPlaced;
+        return true;
     }
 }
