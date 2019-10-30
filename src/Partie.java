@@ -10,9 +10,14 @@ class Partie {
         Joueur j2 = new Joueur("Bar");
 
         placement(j1);
+        for (Case[] c : j1.getPerso().getGrille()) {
+            for (Case s : c)
+                Main.concat("" + s.contenu);
+            Main.concat("\n");
+        }
         placement(j2);
 
-        while (j1.getInventaire().getBateaux().size() != 0 && j2.getInventaire().getBateaux().size() != 0) {
+        while (j1.getInventaire().getBateaux().size() != 0 || j2.getInventaire().getBateaux().size() != 0) {
             tire(j1, j2);
             tire(j2, j1);
         }
@@ -21,7 +26,7 @@ class Partie {
     }
 
     private static void tire(Joueur attaquant, Joueur cible) {
-        System.out.printf("Le joueur %s attaque.%n", attaquant.getPseudo());
+        Main.concat(String.format("Le joueur %s attaque.\n", attaquant.getPseudo()));
         attaquant.tirer(setValue("x"), setValue("y"), cible);
     }
 
@@ -32,12 +37,12 @@ class Partie {
 
         Bateau bateau;
 
-        System.out.println(String.format("Le joueur %s place ses bateaux:", j.getPseudo()));
+        Main.concat(String.format("Le joueur %s place ses bateaux\n", j.getPseudo()));
 
         for (int i = 1; i <= 5; i++) {
             bateau = inv.getBateau(i);
             do {
-                System.out.println(String.format("Bateau n°%s, de taille %s", i, bateau.getTaille()));
+                Main.concat(String.format("Bateau n°%s, de taille %s\n", i, bateau.getTaille()));
                 isPlaced = j.placer(bateau, setValue("x (ligne)"), setValue("y (colonne)"), setValue());
             } while (!isPlaced);
         }
@@ -46,7 +51,7 @@ class Partie {
     private static int setValue(String position) {
         String value;
         do {
-            System.out.printf("Position %s : ", position);
+            Main.concat(String.format("Position %s : ", position));
             value = sc.nextLine();
         } while (!Pattern.compile("[0-9]").matcher(value).matches());
         return Integer.parseInt(value);
@@ -55,7 +60,7 @@ class Partie {
     private static String setValue() {
         String dir;
         do {
-            System.out.print("Direction [droite/bas] : ");
+            Main.concat("Direction [droite/bas] : ");
             dir = sc.nextLine();
         } while (!Pattern.compile("droite|bas").matcher(dir).matches());
         return dir;

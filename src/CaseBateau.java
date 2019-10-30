@@ -3,11 +3,10 @@ class CaseBateau extends Case {
     private Bateau bateau;
     private int id;
 
-    CaseBateau(Bateau bateau, Case c, int id) {
+    CaseBateau(Bateau bateau, Case c) {
         this.bateau = bateau;
         this.pos = c.getPos();
         this.contenu = 1;
-        this.id = id;
     }
 
     Bateau getBateau() {

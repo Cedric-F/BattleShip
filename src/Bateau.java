@@ -90,9 +90,8 @@ class Bateau {
      * @return true si coulé
      */
     boolean toucher(Case c) {
-        this.etat--;
         c = new CaseDetruite(c);
-        return this.etat == 0;
+        return --this.etat == 0;
     }
 
     public String toString() {

@@ -1,3 +1,6 @@
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 class Joueur {
 
     private String pseudo;
@@ -20,7 +23,7 @@ class Joueur {
         return this.inventaire;
     }
 
-    private Grille getPerso() {
+    public Grille getPerso() {
         return this.perso;
     }
 
@@ -48,24 +51,24 @@ class Joueur {
                 Case caseCible = grillePersoCible[ligne][colonne]; // Récupère la case
                 Bateau b = ((CaseBateau) caseCible).getBateau();
 
-                System.out.println("Touché !");
+                Main.concat("Touché !\n");
 
                 if (b.toucher(caseCible))  { // Détruit le bateau si coulé
-                    System.out.println("Coulé !");
+                    Main.concat("Coulé !\n");
                     cible.getInventaire().retirerBateau(b);
                 }
 
                 grillePersoCible[ligne][colonne] = new CaseDetruite(caseCible);
                 cible.perso.setGrille(grillePersoCible);
             } else {
-                System.out.println("Manqué !");
+                Main.concat("Manqué !\n");
             }
 
             grilleAttaqueJoueur[ligne][colonne] = new CaseDetruite(caseAttaque);
             attaque.setGrille(grilleAttaqueJoueur);
 
         } else { // L'attaquant a déjà tiré sur cette case
-            System.out.println("Vous avez déjà tiré à ces coordonnées!");
+            Main.concat("Vous avez déjà tiré à ces coordonnées!");
         }
     }
 
@@ -80,51 +83,55 @@ class Joueur {
         Grille g = this.perso;
 
         Case[][] grille = g.getGrille();
-        boolean isPlaced = false;
+        boolean isPlaceable = false;
         Case slot;
 
         b.setDirection(direction);
 
         try {
             switch (direction) {
-                case "droite": // Ne place le bateau que si sa dernière case est comprise dans la ligne
-                    for (int i = colonne, idCase = 1; i < colonne + b.getTaille(); i++) {
-                        slot = grille[ligne][i];
-                        if (slot instanceof CaseBateau) {
-                            isPlaced = false;
-                            break; // Plus besoin de continuer si l'espace est déjà utilisé
-                        } else { // on crée une place bateau sur l'emplacement
-                            grille[ligne][i] = new CaseBateau(b, slot, idCase);
-                            isPlaced = true;
+                case "droite":
+                    // On récupère un sous ensemble de la ligne ciblée correspondant à la taille du bateau
+                    Case[] row = Arrays.copyOfRange(grille[ligne], colonne, colonne + b.getTaille());
+                    // On filtre les cases de la ligne. Si des cases occupées par un autre bateau sont présente, on ne peut pas placer le bateau actuel
+                    isPlaceable = Arrays.stream(row).filter(c -> c instanceof CaseBateau).toArray().length == 0;
+
+                    if (isPlaceable) { // Si la voie est libre on met à jour les cases avec la référence du bateau
+                        for (int i = colonne; i < colonne + b.getTaille(); i++) {
+                            slot = grille[ligne][i];
+                            grille[ligne][i] = new CaseBateau(b, slot);
                         }
-                        idCase++;
                     }
                     break;
 
                 case "bas":
-                    for (int i = ligne, idCase = 1; i < ligne + b.getTaille(); i++) {
-                        slot = grille[i][colonne];
-                        if (slot instanceof CaseBateau) {
-                            isPlaced = false;
-                            break;
-                        } else {
-                            grille[i][colonne] = new CaseBateau(b, slot, idCase);
-                            isPlaced = true;
+                    // On récupère un sous ensemble de la colonne ciblée
+                    Case[] col = new Case[b.getTaille()];
+                    for (int i = 0; i < col.length; i++)
+                        col[i] = grille[i + ligne][colonne];
+
+                    isPlaceable = Arrays.stream(col).filter(c -> c instanceof CaseBateau).toArray().length == 0;
+
+                    if (isPlaceable) {
+                        for (int i = ligne; i < ligne + b.getTaille(); i++) {
+                            slot = grille[i][colonne];
+                            grille[i][colonne] = new CaseBateau(b, slot);
                         }
-                        idCase++;
                     }
                     break;
             }
-            if (isPlaced) {
+
+            if (isPlaceable) {
                 b.setPos(ligne, colonne);
-                System.out.printf("Le bateau %s est placé en (%s,%s).%n", b.getId(), ligne, colonne);
+                Main.concat(String.format("Le bateau %s est placé en (%s,%s).\n", b.getId(), ligne, colonne));
                 g.setGrille(grille);
             } else {
-                System.out.println("Un bateau est déjà dans la zone.");
+                Main.concat("Un bateau est déjà dans la zone.\n");
                 return false;
             }
+
         } catch (Exception e) {
-            System.out.println("Placement impossible.");
+            Main.concat("Impossible de sortir de la zone de combat!\n");
             return false;
         }
 
